@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./lua.js"></script>
+</head>
+<body>
+    TEST
+    <script type="module">
+        import InitializeModule from './lua.mjs'
+
+        InitializeModule().then(Module => {
+            console.log('module', Module)
+
+            const lua_run = Module.cwrap('runCode','string',['string'])
+            const lua_init = Module.cwrap('initContext','number',null)
+            const lua_reset = Module.cwrap('destroyContext','number',null)
+            const lua_postMessage = Module.cwrap('postMessage', 'string', ['string'])
+
+            
+            
+            window.onMessage = function (string) { return string + ' world' }
+
+            lua_init()
+            
+            const result = lua_run(`
+                function onmessage (message)
+                    print('hello ' .. message)
+                    return 'potato'
+                end
+
+                print('is a thing ' .. (_G.onmessage and 'ye' or 'knee'))
+
+                return 'hello ' .. postMessage('lua')
+            `);
+            
+            const potato = lua_postMessage('world')
+            lua_reset()
+
+            console.log(result, potato)
+
+            // `print("hello lua world!");print(17);for x = 1,4 do print(x) end;print(10-3);return 3`
+        }).catch(function (err) {
+            console.log('failed to load module', err)
+        })
+
+
+
+
+
+// const importObject = { env: { 
+//     _CallJS: arg => console.log(arg)
+// } };
+
+// async function loadWASM (filepath, importObject) {
+//     const response = await fetch(filepath)
+//     const buffer = await response.arrayBuffer();
+//     const obj = await WebAssembly.instantiate(buffer, importObject);
+// }
+
+// loadWASM('./lua.wasm', importObject).then(
+//     (obj)=> {
+//         console.log('loaded', obj)
+//     },
+//     (err)=> {
+//         console.log('failed', err)
+//     }
+// )
+    </script>
+</body>
+</html>
