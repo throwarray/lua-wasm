@@ -68,6 +68,8 @@ const char* EMSCRIPTEN_KEEPALIVE postMessage(const char* value) {
 }
 
 int EMSCRIPTEN_KEEPALIVE destroyContext() {
+	if (lscript_context == 0) return 0;
+	
 	lua_State* prev = lscript_context;
 	lua_close(prev);
 	free(prev);
@@ -80,8 +82,8 @@ int EMSCRIPTEN_KEEPALIVE destroyContext() {
 
 
 int EMSCRIPTEN_KEEPALIVE initContext() {
-	if (lscript_context != 0) destroyContext();
-
+	destroyContext();
+	
 	lua_State* L = luaL_newstate();
 	lua_register(L, "postMessage", handle_lua_message);	
 	lua_register(L, "print", handle_lua_print);

@@ -1,2 +1,4 @@
-./emsdk
-lua-**
+/emsdk/*
+/lua-5.3.5/*
+!/emsdk/.gitkeep
+!/lua-5.3.5/.gitkeep
